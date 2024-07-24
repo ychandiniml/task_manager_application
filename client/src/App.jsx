@@ -1,13 +1,13 @@
 import React from 'react';
-import Login from '../../client/src/components/login';
-import SignUp from '../../client/src/components/signUp';
+import AppRoutes from './routes';
+import Navbar from './components/navbar';
 
 
 function App() {
   return (
     <div className="App">
-      <Login />
-      <SignUp />
+      {/* <Navbar /> */}
+      <AppRoutes/>
     </div>
   );
 }
