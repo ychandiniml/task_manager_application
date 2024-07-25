@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 const Dashboard = ({ data, setData }) => {
   const [showForm, setShowForm] = useState(false);
   const [newTask, setNewTask] = useState({ title: '', description: '', columnId: 'todo' });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortCriteria, setSortCriteria] = useState('recent');
 
   const onDragEnd = result => {
     const { destination, source, draggableId } = result;
@@ -66,7 +68,6 @@ const Dashboard = ({ data, setData }) => {
     });
   };
 
-
   const handleDelete = (taskId) => {
     const updatedTasks = { ...data.tasks };
     delete updatedTasks[taskId];
@@ -83,7 +84,6 @@ const Dashboard = ({ data, setData }) => {
       columns: updatedColumns,
     });
   };
-
 
   const handleAddTask = () => {
     const newTaskId = `task-${Object.keys(data.tasks).length + 1}`;
@@ -118,14 +118,51 @@ const Dashboard = ({ data, setData }) => {
     setNewTask({ title: '', description: '', columnId: 'todo' });
   };
 
+  const handleSearch = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const handleSort = (e) => {
+    setSortCriteria(e.target.value);
+  };
+
+  const getFilteredTasks = (tasks) => {
+    return tasks.filter(task => 
+      task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      task.description.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  };
+
+  const getSortedTasks = (tasks) => {
+    if (sortCriteria === 'recent') {
+      return tasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    } else if (sortCriteria === 'title') {
+      return tasks.sort((a, b) => a.title.localeCompare(b.title));
+    }
+    return tasks;
+  };
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div className="p-4">
-        <button onClick={() => setShowForm(true)} className="bg-blue-500 text-white px-4 py-2 rounded mb-4">Add Task</button>
-
+        <div className="flex justify-between mb-4">
+          <button onClick={() => setShowForm(true)} className="bg-blue-500 text-white px-4 py-2 rounded">Add Task</button>
+          <div className="flex space-x-4">
+            <input
+              type="text"
+              placeholder="Search Tasks..."
+              value={searchQuery}
+              onChange={handleSearch}
+              className="border p-2 rounded"
+            />
+            <select value={sortCriteria} onChange={handleSort} className="border p-2 rounded">
+              <option value="recent">Sort By: Recent</option>
+              <option value="title">Sort By: Title</option>
+            </select>
+          </div>
+        </div>
         {showForm && (
-          <div className="bg-white p-4 rounded shadow-md">
+          <div className="bg-white p-4 rounded shadow-md mb-4">
             <h2 className="text-lg font-bold mb-4">Add New Task</h2>
             <input
               type="text"
@@ -153,11 +190,12 @@ const Dashboard = ({ data, setData }) => {
             <button onClick={() => setShowForm(false)} className="bg-red-500 text-white px-4 py-2 rounded ml-2">Cancel</button>
           </div>
         )}
-
         <div className="flex space-x-4">
           {data.columnOrder.map(columnId => {
             const column = data.columns[columnId];
-            const tasks = column.taskIds.map(taskId => data.tasks[taskId]);
+            let tasks = column.taskIds.map(taskId => data.tasks[taskId]);
+            tasks = getFilteredTasks(tasks);
+            tasks = getSortedTasks(tasks);
 
             return (
               <Column key={column.id} column={column} tasks={tasks} onDelete={handleDelete}/>
@@ -169,7 +207,7 @@ const Dashboard = ({ data, setData }) => {
   );
 };
 
-const Column = ({ column, tasks, onDelete  }) => {
+const Column = ({ column, tasks, onDelete }) => {
   return (
     <div className="bg-gray-100 p-4 rounded-md w-1/3">
       <h2 className="font-bold text-lg mb-4">{column.title}</h2>
@@ -191,8 +229,7 @@ const Column = ({ column, tasks, onDelete  }) => {
   );
 };
 
-const Task = ({ task, index , onDelete}) => {
-
+const Task = ({ task, index, onDelete }) => {
   const navigate = useNavigate();
 
   const handleEdit = () => {
@@ -204,26 +241,27 @@ const Task = ({ task, index , onDelete}) => {
   };
 
   return (
-    <Draggable draggableId={task.id} index={index}>
-      {provided => (
-        <div
-          {...provided.draggableProps}
-          {...provided.dragHandleProps}
-          ref={provided.innerRef}
-          className="bg-blue-200 p-4 rounded-md"
-        >
-          <h3 className="font-bold">{task.title}</h3>
-          <p>{task.description}</p>
-          <p className="text-xs text-gray-500">Created at: {task.createdAt}</p>
-          <div className="mt-2">
-            <button onClick={() => onDelete(task.id)} className="bg-red-500 text-white px-2 py-1 rounded mr-2">Delete</button>
-            <button onClick={handleEdit} className="bg-yellow-500 text-white px-2 py-1 rounded mr-2">Edit</button>
-            <button onClick={handleViewDetails} className="bg-blue-500 text-white px-2 py-1 rounded">View Details</button >
-          </div>
-        </div>
-      )}
-    </Draggable>
-  );
-};
-
+        <Draggable draggableId={task.id} index={index}>
+          {provided => (
+            <div
+              {...provided.draggableProps}
+              {...provided.dragHandleProps}
+              ref={provided.innerRef}
+              className="bg-blue-200 p-4 rounded-md"
+            >
+              <h3 className="font-bold">{task.title}</h3>
+              <p>{task.description}</p>
+              <p className="text-xs text-gray-500">Created at: {task.createdAt}</p>
+              <div className="mt-2">
+                <button onClick={() => onDelete(task.id)} className="bg-red-500 text-white px-2 py-1 rounded mr-2">Delete</button>
+                <button onClick={handleEdit} className="bg-yellow-500 text-white px-2 py-1 rounded mr-2">Edit</button>
+                <button onClick={handleViewDetails} className="bg-blue-500 text-white px-2 py-1 rounded">View Details</button >
+              </div>
+            </div>
+          )}
+        </Draggable>
+      );
+    };
+    
 export default Dashboard;
+    
