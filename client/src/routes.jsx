@@ -54,9 +54,10 @@ const AppRoutes = () => {
     <>
       <Navbar isAuthenticated={isAuthenticated} onLogout={handleLogout} />
       <Routes>
-        <Route path="/" element={<Login onLogin={handleLogin} />} />
+        <Route path="/login" element={<Login onLogin={handleLogin} />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/dashboard" element={isAuthenticated ? <Dashboard  data={data} setData={setData}/> : <Login onLogin={handleLogin} />} />
+        <Route path="/dashboard" element={ <Dashboard  data={data} setData={setData} />} />
         <Route path="/edit/:id"  element={<EditTask  data={data} setData={setData}/>} />
         <Route path="/task/:id" element={<TaskDetails  data={data} setData={setData}/>} />
       </Routes>
