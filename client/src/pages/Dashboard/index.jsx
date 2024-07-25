@@ -63,6 +63,24 @@ const Dashboard = ({ data, setData }) => {
     });
   };
 
+
+  const handleDelete = (taskId) => {
+    const updatedTasks = { ...data.tasks };
+    delete updatedTasks[taskId];
+
+    const updatedColumns = { ...data.columns };
+    for (const columnId in updatedColumns) {
+      const column = updatedColumns[columnId];
+      column.taskIds = column.taskIds.filter(id => id !== taskId);
+    }
+
+    setData({
+      ...data,
+      tasks: updatedTasks,
+      columns: updatedColumns,
+    });
+  };
+
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div className="p-4">
@@ -73,7 +91,7 @@ const Dashboard = ({ data, setData }) => {
             const tasks = column.taskIds.map(taskId => data.tasks[taskId]);
 
             return (
-              <Column key={column.id} column={column} tasks={tasks} />
+              <Column key={column.id} column={column} tasks={tasks} onDelete={handleDelete}/>
             );
           })}
         </div>
@@ -82,7 +100,7 @@ const Dashboard = ({ data, setData }) => {
   );
 };
 
-const Column = ({ column, tasks }) => {
+const Column = ({ column, tasks, onDelete  }) => {
   return (
     <div className="bg-gray-100 p-4 rounded-md w-1/3">
       <h2 className="font-bold text-lg mb-4">{column.title}</h2>
@@ -94,7 +112,7 @@ const Column = ({ column, tasks }) => {
             className="space-y-2"
           >
             {tasks.map((task, index) => (
-              <Task key={task.id} task={task} index={index} />
+              <Task key={task.id} task={task} index={index} onDelete={onDelete} />
             ))}
             {provided.placeholder}
           </div>
@@ -104,7 +122,7 @@ const Column = ({ column, tasks }) => {
   );
 };
 
-const Task = ({ task, index }) => {
+const Task = ({ task, index , onDelete}) => {
 
   const navigate = useNavigate();
 
@@ -125,7 +143,7 @@ const Task = ({ task, index }) => {
           <p>{task.description}</p>
           <p className="text-xs text-gray-500">Created at: {task.createdAt}</p>
           <div className="mt-2">
-            <button className="bg-red-500 text-white px-2 py-1 rounded mr-2">Delete</button>
+            <button onClick={() => onDelete(task.id)} className="bg-red-500 text-white px-2 py-1 rounded mr-2">Delete</button>
             <button  onClick={handleEdit} className="bg-yellow-500 text-white px-2 py-1 rounded mr-2">Edit</button>
             <button className="bg-blue-500 text-white px-2 py-1 rounded">View Details</button>
           </div>
