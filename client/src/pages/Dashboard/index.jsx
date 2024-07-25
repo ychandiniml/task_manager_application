@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = ({ data, setData }) => {
+  const [showForm, setShowForm] = useState(false);
+  const [newTask, setNewTask] = useState({ title: '', description: '', columnId: 'todo' });
+
   const onDragEnd = result => {
     const { destination, source, draggableId } = result;
 
@@ -81,10 +84,76 @@ const Dashboard = ({ data, setData }) => {
     });
   };
 
+
+  const handleAddTask = () => {
+    const newTaskId = `task-${Object.keys(data.tasks).length + 1}`;
+    const newTaskData = {
+      id: newTaskId,
+      title: newTask.title,
+      description: newTask.description,
+      createdAt: new Date().toLocaleString(),
+    };
+
+    const updatedTasks = {
+      ...data.tasks,
+      [newTaskId]: newTaskData,
+    };
+
+    const column = data.columns[newTask.columnId];
+    const updatedColumn = {
+      ...column,
+      taskIds: [...column.taskIds, newTaskId],
+    };
+
+    setData({
+      ...data,
+      tasks: updatedTasks,
+      columns: {
+        ...data.columns,
+        [updatedColumn.id]: updatedColumn,
+      },
+    });
+
+    setShowForm(false);
+    setNewTask({ title: '', description: '', columnId: 'todo' });
+  };
+
+
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div className="p-4">
-        <button className="bg-blue-500 text-white px-4 py-2 rounded mb-4">Add Task</button>
+        <button onClick={() => setShowForm(true)} className="bg-blue-500 text-white px-4 py-2 rounded mb-4">Add Task</button>
+
+        {showForm && (
+          <div className="bg-white p-4 rounded shadow-md">
+            <h2 className="text-lg font-bold mb-4">Add New Task</h2>
+            <input
+              type="text"
+              placeholder="Title"
+              value={newTask.title}
+              onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+              className="border p-2 mb-2 w-full"
+            />
+            <textarea
+              placeholder="Description"
+              value={newTask.description}
+              onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
+              className="border p-2 mb-2 w-full"
+            />
+            <select
+              value={newTask.columnId}
+              onChange={(e) => setNewTask({ ...newTask, columnId: e.target.value })}
+              className="border p-2 mb-2 w-full"
+            >
+              {data.columnOrder.map(columnId => (
+                <option key={columnId} value={columnId}>{data.columns[columnId].title}</option>
+              ))}
+            </select>
+            <button onClick={handleAddTask} className="bg-green-500 text-white px-4 py-2 rounded">Add Task</button>
+            <button onClick={() => setShowForm(false)} className="bg-red-500 text-white px-4 py-2 rounded ml-2">Cancel</button>
+          </div>
+        )}
+
         <div className="flex space-x-4">
           {data.columnOrder.map(columnId => {
             const column = data.columns[columnId];
