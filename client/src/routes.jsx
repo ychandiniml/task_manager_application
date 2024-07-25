@@ -5,6 +5,7 @@ import Signup from './pages/SignUp';
 import Dashboard from './pages/Dashboard';
 import Navbar from './components/Navbar';
 import EditTask from './pages/EditTask';
+import TaskDetails from './pages/TaskDetails';
 
 const AppRoutes = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -57,6 +58,7 @@ const AppRoutes = () => {
         <Route path="/signup" element={<Signup />} />
         <Route path="/dashboard" element={isAuthenticated ? <Dashboard  data={data} setData={setData}/> : <Login onLogin={handleLogin} />} />
         <Route path="/edit/:id"  element={<EditTask  data={data} setData={setData}/>} />
+        <Route path="/task/:id" element={<TaskDetails  data={data} setData={setData}/>} />
       </Routes>
     </>
   );

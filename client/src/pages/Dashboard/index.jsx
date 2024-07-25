@@ -130,6 +130,10 @@ const Task = ({ task, index , onDelete}) => {
     navigate(`/edit/${task.id}`);
   };
 
+  const handleViewDetails = () => {
+    navigate(`/task/${task.id}`);
+  };
+
   return (
     <Draggable draggableId={task.id} index={index}>
       {provided => (
@@ -144,8 +148,8 @@ const Task = ({ task, index , onDelete}) => {
           <p className="text-xs text-gray-500">Created at: {task.createdAt}</p>
           <div className="mt-2">
             <button onClick={() => onDelete(task.id)} className="bg-red-500 text-white px-2 py-1 rounded mr-2">Delete</button>
-            <button  onClick={handleEdit} className="bg-yellow-500 text-white px-2 py-1 rounded mr-2">Edit</button>
-            <button className="bg-blue-500 text-white px-2 py-1 rounded">View Details</button>
+            <button onClick={handleEdit} className="bg-yellow-500 text-white px-2 py-1 rounded mr-2">Edit</button>
+            <button onClick={handleViewDetails} className="bg-blue-500 text-white px-2 py-1 rounded">View Details</button >
           </div>
         </div>
       )}
