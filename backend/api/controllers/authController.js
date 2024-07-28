@@ -19,17 +19,22 @@ export const login = async (req, res) => {
 
 export const register = async (req, res) => {
     try {
-        // console.log("request", req.decoded);
+        // Extract data from the request body and decoded token
         const { firstname, lastname, email } = req.body;
-        // console.log("firstname, lastname, email", firstname, lastname, email);
         const vendorUid = req.decoded.user_id;
 
-        // Check if user already exists
-        const user = await prisma.user.findFirst({
-            where: { email },
+        // Check if a user with the same email or vendorUid already exists
+        const existingUser = await prisma.user.findFirst({
+            where: {
+                OR: [
+                    { email },
+                    { vendorUid }
+                ]
+            }
         });
 
-        if (user) {
+        // If a user exists, return an error message
+        if (existingUser) {
             return res.status(400).json({ message: "User already exists" });
         }
 
@@ -43,7 +48,7 @@ export const register = async (req, res) => {
             },
         });
 
-        // console.log("newUser", newUser);
+        // Return success response
         return res.status(201).json({ message: "User created successfully", data: {"user_id": newUser.userId}});
     } catch (error) {
         console.error("Error during user registration:", error);

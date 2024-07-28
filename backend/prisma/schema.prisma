@@ -15,10 +15,10 @@ generator client {
 
 model User {
   userId     String   @id @default(uuid()) @map("user_id")
-  vendorUid  String   @map("vendor_uid")
+  vendorUid  String   @unique @map("vendor_uid")
   firstname  String   @map("firstname")
   lastname   String?  @map("lastname")
-  email      String
+  email      String   @unique
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
 
@@ -43,3 +43,4 @@ model Task {
 
   @@map("tasks")
 }
+
